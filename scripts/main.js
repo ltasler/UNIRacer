@@ -133,20 +133,49 @@ function handleLoadTexture(texture) {
  * @param obj
  */
 function handleLoadModel(obj, texture_paths) {
-	//TODO : Trenutno se naložijo samo "f" in "v" iz obj fajla. Potrebujemo še vsaj normale vertexov
+	// first load from obj file
 	var lines = obj.split('\n');
 	var vertices = [];
-	var triangles = [];
+	var tex_vertices = [];
+	var vertex_normal = [];
+	var triangles = {
+		v: [],
+		vt: [],
+		vn: []
+	};
 	for (var i in lines) {
 		var line = lines[i].split(' ');
 		if(line[0].indexOf('v') === 0)
-			vertices.push(vec4.fromValues(line[1], line[2], line[3], 1));
-		else if (line[0].indexOf('f') === 0)
-			triangles.push(vec3.fromValues(line[1].split('/')[0],
-				line[2].split('/')[0],
-				line[3].split('/')[0]));
+			vertices.push([line[1], line[2], line[3]]);
+		else if (line[0].indexOf('vt') === 0)
+			tex_vertices.push([line[1], line[2]]);
+		else if (line[0].indexOf('vn') === 0)
+			vertex_normal.push([line[1], line[2], line[3]]);
+		else if (line[0].indexOf('f') === 0) {
+			var v1 = line[1].split('/');
+			var v2 = line[2].split('/');
+			var v3 = line[3].split('/');
+			triangles.v.push(
+				v1[0],
+				v2[0],
+				v3[0]
+			);
+			if (v1.length > 1 && v1[1] !== '')
+				triangles.vt.push(
+					v1[1],
+					v2[1],
+					v3[1]
+				);
+			if (v1.length > 2 && v1[2] !== '')
+			triangles.vn.push(
+				v1[2],
+				v2[2],
+				v3[2]
+			);
+		}
 	}
 
+	// Naložimo še vse teksture
 	var textures = [];
 	for (var i in texture_paths) {
 		var tp = texture_paths[i];
@@ -161,8 +190,9 @@ function handleLoadModel(obj, texture_paths) {
 
 	var model = {
 		vertices: vertices,
+		normals: vertex_normal,
+		textures_uv: tex_vertices,
 		triangles: triangles,
-		v_normals: null,
 		textures: textures
 	};
 	return model
@@ -185,6 +215,7 @@ function loadModel(asset, callback) {
 function initModels() {
 	loadModel(WORLD, function(m) {
 		world = m;
+		addToBuffer()
 	});
 }
 
