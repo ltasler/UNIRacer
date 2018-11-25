@@ -1,5 +1,7 @@
+// Globals!
 var canvas;
 var gl;
+var world;
 
 //
 // initGL
@@ -136,10 +138,10 @@ function handleLoadModel(obj, texture_paths) {
 	var vertices = [];
 	var triangles = [];
 	for (var i in lines) {
-		var line = lines[i].split('i');
-		if(line[0].indexOf('v') !== -1)
+		var line = lines[i].split(' ');
+		if(line[0].indexOf('v') === 0)
 			vertices.push(vec4.fromValues(line[1], line[2], line[3], 1));
-		else if (line[0].indexOf('f') !== -1)
+		else if (line[0].indexOf('f') === 0)
 			triangles.push(vec3.fromValues(line[1].split('/')[0],
 				line[2].split('/')[0],
 				line[3].split('/')[0]));
@@ -174,13 +176,13 @@ function loadModel(asset, callback) {
 			callback(handleLoadModel(request.response), asset.textures);
 		}
 	};
+	request.send();
 }
 
 /**
  *  Tu naložimo vse modele s pripadajočimi teksturami
  */
 function initModels() {
-	var world;
 	loadModel(WORLD, function(m) {
 		world = m;
 	});
