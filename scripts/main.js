@@ -75,8 +75,8 @@ function getShader(gl, id) {
 }
 
 function initShaders() {
-	var fragmentShader = getShader(gl, "per-fragment-lighting-fs");
-	var vertexShader = getShader(gl, "per-fragment-lighting-vs");
+	var fragmentShader = getShader(gl, "shader-fs");
+	var vertexShader = getShader(gl, "shader-vs");
 
 	// Create the shader program
 	shaderProgram = gl.createProgram();
@@ -98,39 +98,18 @@ function initShaders() {
 	// turn on vertex position attribute at specified position
 	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-	// store location of vertex normals variable defined in shader
-	shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
-
-	// turn on vertex normals attribute at specified position
-	gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
-
-	// store location of texture coordinate variable defined in shader
+	// store location of aVertexNormal variable defined in shader
 	shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
 
-	// turn on texture coordinate attribute at specified position
+	// store location of aTextureCoord variable defined in shader
 	gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
 
 	// store location of uPMatrix variable defined in shader - projection matrix
 	shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 	// store location of uMVMatrix variable defined in shader - model-view matrix
 	shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-	// store location of uNMatrix variable defined in shader - normal matrix
-	shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
 	// store location of uSampler variable defined in shader
 	shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-
-	// Material and light uniforms
-	shaderProgram.materialAmbientColorUniform = gl.getUniformLocation(shaderProgram, "uMaterialAmbientColor");
-	shaderProgram.materialDiffuseColorUniform = gl.getUniformLocation(shaderProgram, "uMaterialDiffuseColor");
-	shaderProgram.materialSpecularColorUniform = gl.getUniformLocation(shaderProgram, "uMaterialSpecularColor");
-	shaderProgram.materialShininessUniform = gl.getUniformLocation(shaderProgram, "uMaterialShininess");
-	shaderProgram.materialEmissiveColorUniform = gl.getUniformLocation(shaderProgram, "uMaterialEmissiveColor");
-	shaderProgram.showSpecularHighlightsUniform = gl.getUniformLocation(shaderProgram, "uShowSpecularHighlights");
-	shaderProgram.useTexturesUniform = gl.getUniformLocation(shaderProgram, "uUseTextures");
-	shaderProgram.ambientLightingColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientLightingColor");
-	shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
-	shaderProgram.pointLightingSpecularColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingSpecularColor");
-	shaderProgram.pointLightingDiffuseColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingDiffuseColor");
 }
 
 
