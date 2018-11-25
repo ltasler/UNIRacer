@@ -3,6 +3,9 @@ var canvas;
 var gl;
 var world;
 
+//TODO: Seznam (Dictionary) bufferyov. Moraj biti dvojni par, kot so (ime, buffer). Mogoče ločit sezname glede na uporabnost eg. texture buffer, model buffer...
+var buffers;
+
 //
 // initGL
 //
@@ -209,13 +212,23 @@ function loadModel(asset, callback) {
 	request.send();
 }
 
+function addToBuffer(model, draw_hint) {
+	var buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), draw_hint)
+	buffer.itemSize = 3;
+	buffer.numItems = model.vertices.length / 3;
+	//TODO: Dokončat inicializacijo bufferjev
+
+}
+
 /**
  *  Tu naložimo vse modele s pripadajočimi teksturami
  */
 function initModels() {
 	loadModel(WORLD, function(m) {
 		world = m;
-		addToBuffer()
+		addToBuffer(world, gl.STATIC_DRAW);
 	});
 }
 
