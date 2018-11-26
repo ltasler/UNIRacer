@@ -14,6 +14,6 @@ const ASSETS_PATH = 'assets';
 const WORLD = {
 	model: 'NewTrack/FullTrack.obj',
 	textures: [
-
 	],
+	name: 'World'
 };

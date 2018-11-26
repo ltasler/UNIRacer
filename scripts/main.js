@@ -3,8 +3,18 @@ var canvas;
 var gl;
 var world;
 
-//TODO: Seznam (Dictionary) bufferyov. Moraj biti dvojni par, kot so (ime, buffer). Mogoče ločit sezname glede na uporabnost eg. texture buffer, model buffer...
-var buffers;
+// Model-view and projection matrix and model-view matrix stack
+var mvMatrixStack = [];
+var mvMatrix = mat4.create();
+var pMatrix = mat4.create();
+
+// slovar (dictionary) bufferjev. Ker jih imamo lahko več različnih in za vsakega lahko poteka svoja
+// logika. Seznam je pa zato (namesto svoja spremenljivka), da se lahko uporabi ista koda za
+// inicializacijo več različnih bufferjev in modelov
+var vertexPositionBuffers = {};
+var vertexTextureCoordBuffers = {}; //TODO: Urediti, vse kar se tiče texture coordinat in bufferjev etc.
+var vertexIndexBuffers = {};
+
 
 //
 // initGL
@@ -148,12 +158,12 @@ function handleLoadModel(obj, texture_paths) {
 	};
 	for (var i in lines) {
 		var line = lines[i].split(' ');
-		if(line[0].indexOf('v') === 0)
-			vertices.push([line[1], line[2], line[3]]);
-		else if (line[0].indexOf('vt') === 0)
+		if (line[0].indexOf('vt') === 0)
 			tex_vertices.push([line[1], line[2]]);
 		else if (line[0].indexOf('vn') === 0)
 			vertex_normal.push([line[1], line[2], line[3]]);
+		else if(line[0].indexOf('v') === 0)
+			vertices.push([line[1], line[2], line[3]]);
 		else if (line[0].indexOf('f') === 0) {
 			var v1 = line[1].split('/');
 			var v2 = line[2].split('/');
@@ -212,14 +222,24 @@ function loadModel(asset, callback) {
 	request.send();
 }
 
-function addToBuffer(model, draw_hint) {
+function addToBuffer(model, draw_hint, bufferName) {
+	// Buffer za pozicije vertexov
 	var buffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), draw_hint)
 	buffer.itemSize = 3;
-	buffer.numItems = model.vertices.length / 3;
-	//TODO: Dokončat inicializacijo bufferjev
+	buffer.numItems = model.vertices.length / 3; //TODO: A je to sploh prov?
+	vertexPositionBuffers[bufferName] = buffer;
 
+	// Buffer za indexe obrazov
+	var vertexIndexBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.triangles.v), draw_hint);
+	vertexIndexBuffer.itemSize = 1;
+	vertexIndexBuffer.numItems = model.triangles.v.length;
+	vertexIndexBuffers[bufferName] = vertexIndexBuffer;
+
+	return true;
 }
 
 /**
@@ -228,7 +248,7 @@ function addToBuffer(model, draw_hint) {
 function initModels() {
 	loadModel(WORLD, function(m) {
 		world = m;
-		addToBuffer(world, gl.STATIC_DRAW);
+		addToBuffer(world, gl.STATIC_DRAW, WORLD.name);
 	});
 }
 
@@ -253,18 +273,50 @@ function init() {
 	return true;
 }
 
+//
+// setMatrixUniforms
+//
+// Set the uniforms in shaders.
+//
+function setMatrixUniforms() {
+	gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+	gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+}
 
-function createScene() {
-	//TODO: initialize scene here (what was left from initgl)
+
+//draw frame here
+function draw() {
+	// set the rendering environment to full canvas size
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	// Clear the canvas before we start drawing on it.
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	// Establish the perspective with which we want to view the
+	// scene. Our field of view is 45 degrees, with a width/height
+	// ratio of 640:480, and we only want to see objects between 0.1 units
+	// and 100 units away from the camera.
+	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+
+	// Now move the drawing position a bit to where we want to start
+	// drawing the cube.
+	mat4.translate(mvMatrix, [0.0, 0.0, -7.0]);
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffers[WORLD.name]);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffers[WORLD.name].itemSize, gl.FLOAT, false, 0, 0);
+
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffers[WORLD.name]);
+	setMatrixUniforms();
+	gl.drawElements(gl.TRIANGLES, vertexIndexBuffers[WORLD.name].numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 function gameLoop() {
-		//TODO: Main Game loop, handle all game logic here
+	setTimeout(function () {
+		draw()
+	}, 2000);
 }
 
 function main() {
 	if(init()) {
-		createScene();
 		gameLoop();
 	}
 	else {
