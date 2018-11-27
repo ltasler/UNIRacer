@@ -1,7 +1,6 @@
 // Globals!
 var canvas;
 var gl;
-var world;
 
 // Model-view and projection matrix and model-view matrix stack
 var mvMatrixStack = [];
@@ -211,12 +210,13 @@ function handleLoadModel(obj, texture_paths) {
 	return model
 }
 
-function loadModel(asset, callback) {
+function loadModel(asset) {
 	var request = new XMLHttpRequest();
-	request.open('GET', ASSETS_PATH + '/' + asset.model);
+	request.open('GET', ASSETS_PATH + '/' + asset.model_path);
 	request.onreadystatechange = function () {
 		if (request.readyState === 4) {
-			callback(handleLoadModel(request.response), asset.textures);
+			var model = handleLoadModel(request.response, asset.textures)
+			asset.model = model;
 		}
 	};
 	request.send();
@@ -247,8 +247,10 @@ function addToBuffer(model, draw_hint, bufferName) {
  */
 function initModels() {
 	loadModel(WORLD, function(m) {
-		world = m;
-		addToBuffer(world, gl.STATIC_DRAW, WORLD.name);
+		addToBuffer(m, gl.STATIC_DRAW, WORLD.name);
+	});
+	loadModel(CUBE, function (m) {
+
 	});
 }
 

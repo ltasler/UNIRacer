@@ -12,8 +12,14 @@ const ASSETS_PATH = 'assets';
 
 
 const WORLD = {
-	model: 'NewTrack/FullTrack.obj',
+	model_path: 'NewTrack/FullTrack.obj',
 	textures: [
 	],
 	name: 'World'
+};
+
+const CUBE = {
+	model_path: 'cube.obj',
+	textures: [],
+	name: 'test_cube'
 };
