@@ -7,13 +7,6 @@ var mvMatrixStack = [];
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
 
-// slovar (dictionary) bufferjev. Ker jih imamo lahko več različnih in za vsakega lahko poteka svoja
-// logika. Seznam je pa zato (namesto svoja spremenljivka), da se lahko uporabi ista koda za
-// inicializacijo več različnih bufferjev in modelov
-var vertexPositionBuffers = {};
-var vertexTextureCoordBuffers = {}; //TODO: Urediti, vse kar se tiče texture coordinat in bufferjev etc.
-var vertexIndexBuffers = {};
-
 
 //
 // initGL
@@ -210,26 +203,36 @@ function handleLoadModel(obj, texture_paths) {
 	return model
 }
 
-function loadModel(asset) {
+/**
+ * Loads given model
+ * @param asset asset constant from assetList
+ * @param draw_hint eh. gl.STATIC_DRAW
+ * @param callback optional callback, that is called when loading is done. Useful for knowing when
+ *                 app is done loading
+ */
+function loadModel(asset, draw_hint, callback) {
 	var request = new XMLHttpRequest();
 	request.open('GET', ASSETS_PATH + '/' + asset.model_path);
 	request.onreadystatechange = function () {
 		if (request.readyState === 4) {
 			var model = handleLoadModel(request.response, asset.textures)
 			asset.model = model;
+			// In dodaj v buffer
+			asset.buffers = createBuffer(model, draw_hint);
+			if(callback)
+				callback();
 		}
 	};
 	request.send();
 }
 
-function addToBuffer(model, draw_hint, bufferName) {
+function createBuffer(model, draw_hint) {
 	// Buffer za pozicije vertexov
 	var buffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), draw_hint)
 	buffer.itemSize = 3;
 	buffer.numItems = model.vertices.length / 3; //TODO: A je to sploh prov?
-	vertexPositionBuffers[bufferName] = buffer;
 
 	// Buffer za indexe obrazov
 	var vertexIndexBuffer = gl.createBuffer();
@@ -237,21 +240,19 @@ function addToBuffer(model, draw_hint, bufferName) {
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.triangles.v), draw_hint);
 	vertexIndexBuffer.itemSize = 1;
 	vertexIndexBuffer.numItems = model.triangles.v.length;
-	vertexIndexBuffers[bufferName] = vertexIndexBuffer;
 
-	return true;
+	return {
+		vertexPositionBuffer: buffer,
+		vertexIndexBuffer: vertexIndexBuffer
+	};
 }
 
 /**
  *  Tu naložimo vse modele s pripadajočimi teksturami
  */
 function initModels() {
-	loadModel(WORLD, function(m) {
-		addToBuffer(m, gl.STATIC_DRAW, WORLD.name);
-	});
-	loadModel(CUBE, function (m) {
-
-	});
+	loadModel(WORLD, gl.STATIC_DRAW);
+	loadModel(CUBE, gl.STATIC_DRAW);
 }
 
 function init() {
@@ -303,12 +304,12 @@ function draw() {
 	// drawing the cube.
 	mat4.translate(mvMatrix, [0.0, 0.0, -7.0]);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffers[WORLD.name]);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffers[WORLD.name].itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, CUBE.buffers.vertexPositionBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, CUBE.buffers.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffers[WORLD.name]);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, CUBE.buffers.vertexIndexBuffer);
 	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES, vertexIndexBuffers[WORLD.name].numItems, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLES, CUBE.buffers.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 function gameLoop() {
