@@ -13,8 +13,7 @@ const ASSETS_PATH = 'assets';
 
 var WORLD = {
 	model_path: 'NewTrack/FullTrack.obj',
-	textures: [
-	],
+	textures: [],
 	name: 'World'
 };
 

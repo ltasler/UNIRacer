@@ -151,19 +151,26 @@ function handleLoadModel(obj, texture_paths) {
 	for (var i in lines) {
 		var line = lines[i].split(' ');
 		if (line[0].indexOf('vt') === 0)
-			tex_vertices.push([line[1], line[2]]);
+			tex_vertices.push(line[1], line[2]);
 		else if (line[0].indexOf('vn') === 0)
-			vertex_normal.push([line[1], line[2], line[3]]);
-		else if(line[0].indexOf('v') === 0)
-			vertices.push([line[1], line[2], line[3]]);
+			vertex_normal.push(line[1], line[2], line[3]);
+		else if(line[0].indexOf('v') === 0) {
+			vertices.push(line[1], line[1], line[1]);
+		}
 		else if (line[0].indexOf('f') === 0) {
 			var v1 = line[1].split('/');
 			var v2 = line[2].split('/');
 			var v3 = line[3].split('/');
+			var v4 = line[4].split('/');
 			triangles.v.push(
 				v1[0],
 				v2[0],
 				v3[0]
+			);
+			triangles.v.push(
+				v1[0],
+				v3[0],
+				v4[0]
 			);
 			if (v1.length > 1 && v1[1] !== '')
 				triangles.vt.push(
@@ -309,7 +316,7 @@ function draw() {
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, CUBE.buffers.vertexIndexBuffer);
 	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES, CUBE.buffers.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	gl.drawArrays(gl.TRIANGLES, 0, CUBE.buffers.vertexIndexBuffer.numItems);
 }
 
 function gameLoop() {
