@@ -18,3 +18,11 @@ var WORLD = {
 var CUBE = {
 	model_path: 'cube.obj'
 };
+
+var PLANE = {
+	model_path: 'plane/plane.obj'
+};
+
+var TEST_CAR = {
+	model_path: 'test_car/test_car.obj'
+}
