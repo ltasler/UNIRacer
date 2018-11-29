@@ -324,13 +324,12 @@ function update() {
 		if (currentlyPressedKeys[83] || currentlyPressedKeys[40])  // S || ArrowDown
 			car.brake(elapsed);
 		if (currentlyPressedKeys[65] || currentlyPressedKeys[37])  // A || LeftArrow
-			car.rotation(-1, elapsed);
+			car.rotate(-1, elapsed);
 		if (currentlyPressedKeys[68] || currentlyPressedKeys[39])  // D || RightArrow
-			car.rotation(1, elapsed);
+			car.rotate(1, elapsed);
 		car.update(elapsed);
 
-		console.log(car.speed);
-
+		console.log(car.rotation);
 	}
 	lastTime = timeNow;
 }

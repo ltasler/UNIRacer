@@ -21,7 +21,7 @@ Car.prototype.brake = function(deltaTime) {
 	this.speed = this.speed - this.BRAKE_SPEED * deltaTime;
 };
 
-Car.prototype.rotation = function(direction, deltaTime) {
+Car.prototype.rotate = function(direction, deltaTime) {
 	this.rotation[1] = this.rotation[1] + direction * this.rotationSpeed * deltaTime;
 };
 
