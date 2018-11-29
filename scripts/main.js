@@ -329,7 +329,6 @@ function update() {
 			car.rotate(1, elapsed);
 		car.update(elapsed);
 
-		console.log(car.rotation);
 	}
 	lastTime = timeNow;
 }

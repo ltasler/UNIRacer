@@ -22,13 +22,13 @@ Car.prototype.brake = function(deltaTime) {
 };
 
 Car.prototype.rotate = function(direction, deltaTime) {
-	this.rotation[1] = this.rotation[1] + direction * this.rotationSpeed * deltaTime;
+	this.rotation = this.rotation + direction * this.rotationSpeed * deltaTime;
 };
 
 Car.prototype.update = function(deltaTime) {
-	var x = Math.cos(this.rotation[1]) * Math.cos(this.rotation[2]);
-	var y = Math.sin(this.rotation[1]) * Math.cos(this.rotation[2]);
-	var z = Math.sin(this.rotation[2]);
+	var x = Math.cos(this.rotation[1]) * Math.cos(0);
+	var y = Math.sin(this.rotation[1]) * Math.cos(0);
+	var z = Math.sin(0);
 
 	var direction = vec3.create();
 	direction = [x, y, z];
@@ -51,8 +51,9 @@ Car.prototype.update = function(deltaTime) {
 Car.prototype.getMvMatrix = function() {
 	var mvMatrix = mat4.create();
 	mat4.identity(mvMatrix);
-	mat4.rotate(mvMatrix, degToRad(this.rotation[1]), [0, 1, 0]);
+	mat4.rotate(mvMatrix, degToRad(this.rotation), [0, 1, 0]);
 	mat4.translate(mvMatrix, this.positon);
+	return mvMatrix;
 };
 
 Car.prototype.draw = function() {
