@@ -325,7 +325,6 @@ function update() {
 		if (currentlyPressedKeys[68] || currentlyPressedKeys[39])  // D || RightArrow
 			car.rotate(1, elapsed);
 		car.update(elapsed);
-		console.log(car.positon);
 
 	}
 	lastTime = timeNow;
