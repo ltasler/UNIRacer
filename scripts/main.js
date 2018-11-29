@@ -21,6 +21,11 @@ var rotationCube = 0;
 // Helper variable for animation
 var lastTime = 0;
 
+var currentlyPressedKeys = {};
+
+// Ze Car
+var car = new Car();
+
 //
 // Matrix utility functions
 //
@@ -36,7 +41,7 @@ function mvPushMatrix() {
 
 function mvPopMatrix() {
 	if (mvMatrixStack.length == 0) {
-		throw "Invalid popMatrix!";
+		throw 'Invalid popMatrix!';
 	}
 	mvMatrix = mvMatrixStack.pop();
 }
@@ -71,21 +76,21 @@ function initBuffers() {
 	gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
 	var vertices = [
 		// Front face
-		0.0,  1.0,  0.0,
-		-1.0, -1.0,  1.0,
-		1.0, -1.0,  1.0,
+		0.0, 1.0, 0.0,
+		-1.0, -1.0, 1.0,
+		1.0, -1.0, 1.0,
 		// Right face
-		0.0,  1.0,  0.0,
-		1.0, -1.0,  1.0,
+		0.0, 1.0, 0.0,
+		1.0, -1.0, 1.0,
 		1.0, -1.0, -1.0,
 		// Back face
-		0.0,  1.0,  0.0,
+		0.0, 1.0, 0.0,
 		1.0, -1.0, -1.0,
 		-1.0, -1.0, -1.0,
 		// Left face
-		0.0,  1.0,  0.0,
+		0.0, 1.0, 0.0,
 		-1.0, -1.0, -1.0,
-		-1.0, -1.0,  1.0
+		-1.0, -1.0, 1.0
 	];
 
 	// Pass the list of vertices into WebGL to build the shape. We
@@ -133,40 +138,40 @@ function initBuffers() {
 	// Now create an array of vertices for the cube.
 	vertices = [
 		// Front face
-		-1.0, -1.0,  1.0,
-		1.0, -1.0,  1.0,
-		1.0,  1.0,  1.0,
-		-1.0,  1.0,  1.0,
+		-1.0, -1.0, 1.0,
+		1.0, -1.0, 1.0,
+		1.0, 1.0, 1.0,
+		-1.0, 1.0, 1.0,
 
 		// Back face
 		-1.0, -1.0, -1.0,
-		-1.0,  1.0, -1.0,
-		1.0,  1.0, -1.0,
+		-1.0, 1.0, -1.0,
+		1.0, 1.0, -1.0,
 		1.0, -1.0, -1.0,
 
 		// Top face
-		-1.0,  1.0, -1.0,
-		-1.0,  1.0,  1.0,
-		1.0,  1.0,  1.0,
-		1.0,  1.0, -1.0,
+		-1.0, 1.0, -1.0,
+		-1.0, 1.0, 1.0,
+		1.0, 1.0, 1.0,
+		1.0, 1.0, -1.0,
 
 		// Bottom face
 		-1.0, -1.0, -1.0,
 		1.0, -1.0, -1.0,
-		1.0, -1.0,  1.0,
-		-1.0, -1.0,  1.0,
+		1.0, -1.0, 1.0,
+		-1.0, -1.0, 1.0,
 
 		// Right face
 		1.0, -1.0, -1.0,
-		1.0,  1.0, -1.0,
-		1.0,  1.0,  1.0,
-		1.0, -1.0,  1.0,
+		1.0, 1.0, -1.0,
+		1.0, 1.0, 1.0,
+		1.0, -1.0, 1.0,
 
 		// Left face
 		-1.0, -1.0, -1.0,
-		-1.0, -1.0,  1.0,
-		-1.0,  1.0,  1.0,
-		-1.0,  1.0, -1.0
+		-1.0, -1.0, 1.0,
+		-1.0, 1.0, 1.0,
+		-1.0, 1.0, -1.0
 	];
 
 	// Now pass the list of vertices into WebGL to build the shape. We
@@ -195,7 +200,7 @@ function initBuffers() {
 		var color = colors[i];
 
 		// Repeat each color four times for the four vertices of the face
-		for (var j=0; j < 4; j++) {
+		for (var j = 0; j < 4; j++) {
 			unpackedColors = unpackedColors.concat(color);
 		}
 	}
@@ -214,12 +219,12 @@ function initBuffers() {
 	// indices into the vertex array to specify each triangle's
 	// position.
 	var cubeVertexIndices = [
-		0, 1, 2,      0, 2, 3,    // Front face
-		4, 5, 6,      4, 6, 7,    // Back face
-		8, 9, 10,     8, 10, 11,  // Top face
-		12, 13, 14,   12, 14, 15, // Bottom face
-		16, 17, 18,   16, 18, 19, // Right face
-		20, 21, 22,   20, 22, 23  // Left face
+		0, 1, 2, 0, 2, 3,    // Front face
+		4, 5, 6, 4, 6, 7,    // Back face
+		8, 9, 10, 8, 10, 11,  // Top face
+		12, 13, 14, 12, 14, 15, // Bottom face
+		16, 17, 18, 16, 18, 19, // Right face
+		20, 21, 22, 20, 22, 23  // Left face
 	];
 
 	// Now send the element array to GL
@@ -305,22 +310,31 @@ function drawScene() {
 	mvPopMatrix();
 }
 
-//
-// animate
-//
-// Called every time before redeawing the screen.
-//
-function animate() {
-	var timeNow = new Date().getTime();
-	if (lastTime != 0) {
-		var elapsed = timeNow - lastTime;
 
-		// rotate pyramid and cube for a small amount
-		rotationPyramid += (90 * elapsed) / 1000.0;
-		rotationCube += (75 * elapsed) / 1000.0;
+function update() {
+	var timeNow = new Date().getTime();
+	if (lastTime !== 0) {
+		var elapsed = (timeNow - lastTime) / 1000.0;
+
+		//legacy stuff
+		rotationPyramid += (90 * elapsed);
+
+		if (currentlyPressedKeys[87] || currentlyPressedKeys[38])  // W || ArrowUp
+			car.accelerate(elapsed);
+		if (currentlyPressedKeys[83] || currentlyPressedKeys[40])  // S || ArrowDown
+			car.brake(elapsed);
+		if (currentlyPressedKeys[65] || currentlyPressedKeys[37])  // A || LeftArrow
+			car.rotation(-1, elapsed);
+		if (currentlyPressedKeys[68] || currentlyPressedKeys[39])  // D || RightArrow
+			car.rotation(1, elapsed);
+		car.update(elapsed);
+
+		console.log(car.speed);
+
 	}
 	lastTime = timeNow;
 }
+
 
 //
 // start
@@ -328,7 +342,7 @@ function animate() {
 // Called when the canvas is created to get the ball rolling.
 //
 function main() {
-	var canvas = document.getElementById("glcanvas");
+	var canvas = document.getElementById('glcanvas');
 
 	gl = initGL(canvas);      // Initialize the GL context
 
@@ -347,9 +361,18 @@ function main() {
 		// we'll be drawing.
 		initBuffers();
 
+		// Bind keyboard handling functions to document handlers
+		document.onkeydown = function (event) {
+			currentlyPressedKeys[event.keyCode] = true;
+		};
+		document.onkeyup = function(event) {
+			currentlyPressedKeys[event.keyCode] = false;
+		};
+
 		// Set up to draw the scene periodically.
-		setInterval(function() {
-			requestAnimationFrame(animate);
+		setInterval(function () {
+			//requestAnimationFrame(animate);
+			update();
 			drawScene();
 		}, 15);
 	}

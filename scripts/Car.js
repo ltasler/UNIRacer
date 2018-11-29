@@ -7,13 +7,14 @@ function Car(position, rotation, speed, rotationSpeed) {
 	this.speed = typeof speed !== 'undefined' ? speed : 0.0;
 	this.rotation = typeof rotation !== 'undefined' ? rotation : 0.0;
 	this.rotationSpeed = typeof rotationSpeed !== 'undefined' ? rotationSpeed : 0.2;
-	this.BRAKE_SPEED = 10.0;
-	this.DRAG_SPEED = 0.2;
+	this.BRAKE_SPEED = 0.1;
+	this.DRAG_SPEED = 0.02;
 }
 
 Car.prototype.accelerate = function(deltaTime) {
-	var a = this.speed * Math.exp(-0.03 * this.speed);
-	this.speed = a * deltaTime;
+	//var a = this.speed + Math.exp(-0.03 * this.speed);
+	var a = 0.05;
+	this.speed += a * deltaTime;
 };
 
 Car.prototype.brake = function(deltaTime) {
@@ -29,16 +30,23 @@ Car.prototype.update = function(deltaTime) {
 	var y = Math.sin(this.rotation[1]) * Math.cos(this.rotation[2]);
 	var z = Math.sin(this.rotation[2]);
 
-	var direction = vec3.create()
+	var direction = vec3.create();
 	direction = [x, y, z];
 
-	this.speed -= this.DRAG_SPEED * deltaTime;
+	var drag_change = this.DRAG_SPEED * deltaTime;
+	if(this.speed > 0 + drag_change)
+		this.speed -= this.DRAG_SPEED * deltaTime;
+	else if (this.speed < 0 - drag_change)
+		this.speed += drag_change;
+	else
+		this.speed = 0;
+
 	var offset = vec3.create();
 	vec3.scale(offset, direction, this.speed);
 
 	vec3.add(this.positon, this.positon, offset);
-
 };
+
 
 Car.prototype.getMvMatrix = function() {
 	var mvMatrix = mat4.create();
