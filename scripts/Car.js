@@ -54,9 +54,9 @@ Car.prototype.update = function(deltaTime) {
 Car.prototype.getMvMatrix = function() {
 	var mvMatrix = mat4.create();
 	mat4.identity(mvMatrix);
-	mat4.translate(mvMatrix, [0,0,-7])
+	mat4.translate(mvMatrix, [0,0,-7]);
 	mat4.translate(mvMatrix, this.positon);
-	mat4.rotate(mvMatrix, degToRad(this.rotation), [0, 1, 0]);
+	mat4.rotate(mvMatrix, this.rotation, [0, .8, 0]);
 	return mvMatrix;
 };
 
