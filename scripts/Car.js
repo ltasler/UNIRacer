@@ -40,6 +40,13 @@ Car.prototype.update = function(deltaTime) {
 
 };
 
+Car.prototype.getMvMatrix = function() {
+	var mvMatrix = mat4.create();
+	mat4.identity(mvMatrix);
+	mat4.rotate(mvMatrix, degToRad(this.rotation[1]), [0, 1, 0]);
+	mat4.translate(mvMatrix, this.positon);
+};
+
 Car.prototype.draw = function() {
 
 	mat4.rotate(this.mvMatrix, degToRad(this.rotation), [0.0, 1.0, 0.0]);
