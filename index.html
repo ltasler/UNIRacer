@@ -30,7 +30,7 @@
     <script id="shader-vs" type="x-shader/x-vertex">
     		// atributes for setting vertex position and color
 		    attribute vec3 aVertexPosition;
-		    //attribute vec4 aVertexColor;
+		    attribute vec4 aVertexColor;
 
 		    uniform mat4 uMVMatrix;	// model-view matrix
 		    uniform mat4 uPMatrix;	// projection matrix
@@ -41,11 +41,11 @@
 		    void main(void) {
 		    	// calculate the vertex position
 		        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-		        vColor = vec4(1.0, 0.0, 0.0, 1.0);
+		        vColor = aVertexColor;
 		    }
 	    </script>
 </head>
-<body onload="main()">
+<body onload="start()">
     <h1>UNIRacer</h1>
     <canvas id="glcanvas" width="1280px" height="720px">
         No <code>&lt;canvas&gt;</code> support in your browser.

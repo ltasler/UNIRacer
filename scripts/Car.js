@@ -6,7 +6,7 @@ function Car(position, rotation, speed, rotationSpeed) {
 	this.positon = typeof position !== 'undefined' ? position : [0.0, 0.0, 0.0];
 	this.speed = typeof speed !== 'undefined' ? speed : 0.0;
 	this.rotation = typeof rotation !== 'undefined' ? rotation : 0.0;
-	this.rotationSpeed = 0.2;
+	this.rotationSpeed = typeof position !== 'undefined' ? rotationSpeed : 0.2;
 	this.mvMatrix = mat4.create();
 	this.brakeSpeed = 10.0;
 }
