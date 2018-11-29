@@ -11,23 +11,27 @@ function Car(position, rotation, speed, rotationSpeed) {
 	this.DRAG_SPEED = 0.02;
 }
 
+
 Car.prototype.accelerate = function(deltaTime) {
 	//var a = this.speed + Math.exp(-0.03 * this.speed);
 	var a = 0.05;
 	this.speed += a * deltaTime;
 };
 
+
 Car.prototype.brake = function(deltaTime) {
 	this.speed = this.speed - this.BRAKE_SPEED * deltaTime;
 };
+
 
 Car.prototype.rotate = function(direction, deltaTime) {
 	this.rotation = this.rotation + direction * this.rotationSpeed * deltaTime;
 };
 
+
 Car.prototype.update = function(deltaTime) {
-	var x = Math.cos(this.rotation[1]) * Math.cos(0);
-	var y = Math.sin(this.rotation[1]) * Math.cos(0);
+	var x = Math.cos(this.rotation) * Math.cos(0);
+	var y = Math.sin(this.rotation) * Math.cos(0);
 	var z = Math.sin(0);
 
 	var direction = vec3.create();
@@ -41,28 +45,18 @@ Car.prototype.update = function(deltaTime) {
 	else
 		this.speed = 0;
 
-	var offset = vec3.create();
-	vec3.scale(offset, direction, this.speed);
-
-	vec3.add(this.positon, this.positon, offset);
+	this.positon[0] += direction[0] * this.speed;
+	this.positon[1] += direction[1] * this.speed;
+	this.positon[2] += direction[2] * this.speed;
 };
 
 
 Car.prototype.getMvMatrix = function() {
 	var mvMatrix = mat4.create();
 	mat4.identity(mvMatrix);
-	mat4.rotate(mvMatrix, degToRad(this.rotation), [0, 1, 0]);
 	mat4.translate(mvMatrix, this.positon);
+	mat4.rotate(mvMatrix, degToRad(this.rotation), [0, 1, 0]);
 	return mvMatrix;
-};
-
-Car.prototype.draw = function() {
-
-	mat4.rotate(this.mvMatrix, degToRad(this.rotation), [0.0, 1.0, 0.0]);
-	mat4.translate(this.mvMatrix, this.positon);
-
-	//TODO: do Car Drawing logic here (or return mvMatrix and draw it elsewhere)
-
 };
 
 

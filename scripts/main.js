@@ -285,11 +285,8 @@ function drawScene() {
 
 	// Now move the drawing position a bit to where we want to start
 	// drawing the cube.
-	mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
-
-	// Save the current matrix, then rotate before we draw.
 	mvPushMatrix();
-	mat4.rotate(mvMatrix, degToRad(rotationCube), [1, 1, 1]);
+	mvMatrix = car.getMvMatrix();
 
 	// Draw the cube by binding the array buffer to the cube's vertices
 	// array, setting attributes, and pushing it to GL.
@@ -328,6 +325,7 @@ function update() {
 		if (currentlyPressedKeys[68] || currentlyPressedKeys[39])  // D || RightArrow
 			car.rotate(1, elapsed);
 		car.update(elapsed);
+		console.log(car.positon);
 
 	}
 	lastTime = timeNow;
