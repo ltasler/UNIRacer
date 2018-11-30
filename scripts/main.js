@@ -163,9 +163,10 @@ function main() {
 		};
 		// Set up to draw the scene periodically.
 		setInterval(function () {
-			if(NUM_ASSETS <= loadedMeshes)
-			update();
-			drawScene();
+			if (NUM_ASSETS <= loadedMeshes) {
+				update();
+				drawScene();
+			}
 		}, 15);
 	}
 }

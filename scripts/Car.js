@@ -30,12 +30,7 @@ Car.prototype.rotate = function(direction, deltaTime) {
 
 
 Car.prototype.update = function(deltaTime) {
-	var x = Math.cos(0) * Math.cos(this.rotation);
-	var y = Math.sin(0) * Math.cos(this.rotation);
-	var z = Math.sin(this.rotation);
-
-	var direction = vec3.create();
-	direction = [x, y, z];
+	var direction = this.getDirection();
 
 	var drag_change = this.DRAG_SPEED * deltaTime;
 	if(this.speed > 0 + drag_change)
@@ -50,6 +45,13 @@ Car.prototype.update = function(deltaTime) {
 	this.positon[2] += direction[2] * this.speed;
 };
 
+Car.prototype.getDirection = function () {
+	var x = Math.cos(0) * Math.cos(this.rotation);
+	var y = Math.sin(0) * Math.cos(this.rotation);
+	var z = Math.sin(this.rotation);
+
+	return [x, y, z];
+};
 
 Car.prototype.getMvMatrix = function() {
 	var mvMatrix = mat4.create();
