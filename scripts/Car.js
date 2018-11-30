@@ -64,7 +64,7 @@ Car.prototype.getMvMatrix = function() {
 
 Car.prototype.getInverseMvMatrix = function () {
 	var m = this.getMvMatrix();
-	mat4.inverse(m);
+	mat4.inverse(m, m);
 	return m;
 };
 

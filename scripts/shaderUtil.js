@@ -58,37 +58,65 @@ function initShaders() {
 	var fragmentShader = getShader(gl, "shader-fs");
 	var vertexShader = getShader(gl, "shader-vs");
 
-	// Create the shader program
 	var shaderProgram = gl.createProgram();
 	gl.attachShader(shaderProgram, vertexShader);
 	gl.attachShader(shaderProgram, fragmentShader);
 	gl.linkProgram(shaderProgram);
 
-	// If creating the shader program failed, alert
 	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-		alert("Unable to initialize the shader program.");
+		alert("Could not initialise shaders");
 	}
-
-	// start using shading program for rendering
 	gl.useProgram(shaderProgram);
 
-	// store location of aVertexPosition variable defined in shader
-	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+	const attrs = {
+		aVertexPosition: OBJ.Layout.POSITION.key,
+		aVertexNormal: OBJ.Layout.NORMAL.key,
+		aTextureCoord: OBJ.Layout.UV.key,
+		aDiffuse: OBJ.Layout.DIFFUSE.key,
+		aSpecular: OBJ.Layout.SPECULAR.key,
+		aSpecularExponent: OBJ.Layout.SPECULAR_EXPONENT.key
+	};
 
-	// turn on vertex position attribute at specified position
-	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+	shaderProgram.attrIndices = {};
+	for (const attrName in attrs) {
+		if (!attrs.hasOwnProperty(attrName)) {
+			continue;
+		}
+		shaderProgram.attrIndices[attrName] = gl.getAttribLocation(shaderProgram, attrName);
+		if (shaderProgram.attrIndices[attrName] != -1) {
+			gl.enableVertexAttribArray(shaderProgram.attrIndices[attrName]);
+		} else {
+			console.warn(
+				'Shader attribute "' +
+				attrName +
+				'" not found in shader. Is it undeclared or unused in the shader code?'
+			);
+		}
+	}
 
-	// store location of aVertexColor variable defined in shader
-	//shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-
-	// turn on vertex color attribute at specified position
-	//gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
-
-	// store location of uPMatrix variable defined in shader - projection matrix
 	shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-
-	// store location of uMVMatrix variable defined in shader - model-view matrix
 	shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+	shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
 
+	shaderProgram.applyAttributePointers = function(model) {
+		const layout = model.mesh.vertexBuffer.layout;
+		for (const attrName in attrs) {
+			if (!attrs.hasOwnProperty(attrName) || shaderProgram.attrIndices[attrName] == -1) {
+				continue;
+			}
+			const layoutKey = attrs[attrName];
+			if (shaderProgram.attrIndices[attrName] != -1) {
+				const attr = layout[layoutKey];
+				gl.vertexAttribPointer(
+					shaderProgram.attrIndices[attrName],
+					attr.size,
+					gl[attr.type],
+					attr.normalized,
+					attr.stride,
+					attr.offset
+				);
+			}
+		}
+	};
 	return shaderProgram;
 }

@@ -12,30 +12,39 @@ const ASSETS_PATH = 'assets';
 
 
 var WORLD = {
-	model_path: 'NewTrack/FullTrack.obj',
+	model_path: ASSETS_PATH + 'NewTrack/FullTrack.obj',
+	material: ASSETS_PATH + 'NewTrack/FullTrack.mtl',
 	name: 'World'
 };
 
 var CUBE = {
 	model_path: 'cube.obj',
+	material_path: 'cube.mtl',
 	name: 'Cube'
 };
 
 var PLANE = {
-	model_path: 'plane/plane.obj',
-	name: 'Plane'
+	name: 'Plane',
+	obj: ASSETS_PATH + '/plane/plane.obj',
+	mtl: ASSETS_PATH + '/plane/plane.mtl'
 };
 
 var TEST_CAR = {
 	model_path: 'test_car/test_car.obj',
+	material_path: 'test_car/test_car.mtl',
 	name: 'TestCar'
 };
 
 var LOWPOLY_CART = {
-	model_path: 'kart/lowpoly_kart.obj',
-	name: 'LowPolyCart'
+	name: 'LowPolyCart',
+	obj: ASSETS_PATH + '/kart/lowpoly_kart.obj',
+	mtl: ASSETS_PATH + '/kart/lowpoly_kart.mtl'
 };
 
 function getAssetPath(asset) {
 	return ASSETS_PATH + '/' + asset.model_path;
+}
+
+function getMaterialPath(asset) {
+	return ASSETS_PATH + '/' + asset.material_path;
 }

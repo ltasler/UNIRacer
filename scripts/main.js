@@ -17,10 +17,7 @@ var car = new Car();
 
 // List of meshes and buffers
 var meshes = {};
-var loadedMeshes = 0;
-
-// Number of all assets
-const NUM_ASSETS = 2;
+var models = {};
 
 const CAMERA_OFFSET = [0, -2.5, -10];
 const CAMERA_ROTATION_X = 30;
@@ -54,19 +51,47 @@ function mvPopMatrix() {
 function setMatrixUniforms() {
 	gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
 	gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+
+	var normalMatrix = mat3.create();
+	//mat3.normalFromMat4(normalMatrix, mvMatrix); TODO: Check it out, novo verzijo glMatrix
+	mat3.identity(normalMatrix);
+	gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 }
 
-function loadAsset(asset) {
-	var request = new XMLHttpRequest();
-	request.open('GET', getAssetPath(asset));
-	request.onreadystatechange = function () {
-		if (request.readyState === 4) {
-			meshes[asset.name] = new OBJ.Mesh(request.response);
-			OBJ.initMeshBuffers(gl, meshes[asset.name]);
-			loadedMeshes++;
-		}
-	};
-	request.send();
+function initBuffers() {
+	var layout = new OBJ.Layout(
+		OBJ.Layout.POSITION,
+		OBJ.Layout.NORMAL,
+		OBJ.Layout.DIFFUSE,
+		OBJ.Layout.UV,
+		OBJ.Layout.SPECULAR,
+		OBJ.Layout.SPECULAR_EXPONENT
+	);
+
+	// initialize the mesh's buffers
+	for (var mesh in meshes) {
+		// Create the vertex buffer for this mesh
+		var vertexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+		var vertexData = meshes[mesh].makeBufferData(layout);
+		gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
+		vertexBuffer.numItems = vertexData.numItems;
+		vertexBuffer.layout = layout;
+		meshes[mesh].vertexBuffer = vertexBuffer;
+
+		// Create the index buffer for this mesh
+		var indexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+		var indexData = meshes[mesh].makeIndexBufferData();
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
+		indexBuffer.numItems = indexData.numItems;
+		meshes[mesh].indexBuffer = indexBuffer;
+
+		// this loops through the mesh names and creates new
+		// model objects and setting their mesh to the current mesh
+		models[mesh] = {};
+		models[mesh].mesh = meshes[mesh];
+	}
 }
 
 //<editor-fold> Drawing the scene
@@ -84,28 +109,27 @@ function drawScene() {
 
 	// lowpoly Kart rendering
 	mvPushMatrix();
-	var m = meshes[LOWPOLY_CART.name];
-	renderObject(m.vertexBuffer, m.indexBuffer);
+	var m = models[LOWPOLY_CART.name];
+	renderObject(m);
 	mvPopMatrix();
 
 	var carMvMatrixInv = car.getInverseMvMatrix();
 
 	mvPushMatrix();
-	m = meshes[PLANE.name];
+	m = models[PLANE.name];
 	mat4.translate(mvMatrix, [0, -1.5, 0]);
 	mat4.multiply(mvMatrix, carMvMatrixInv);
-	renderObject(m.vertexBuffer, m.indexBuffer);
+	renderObject(m);
 	mvPopMatrix();
 }
 
-function renderObject(vertexBuffer, indexBuffer) {
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexBuffer.itemSize,
-		gl.FLOAT, false, 0, 0);
+function renderObject(model) {
+	gl.bindBuffer(gl.ARRAY_BUFFER, model.mesh.vertexBuffer);
+	shaderProgram.applyAttributePointers(model);
 
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.mesh.indexBuffer);
 	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES, indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLES, model.mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 function setPerspective() {
@@ -157,8 +181,18 @@ function main() {
 		// vertices and so forth is established.
 		shaderProgram = initShaders();
 
-		loadAsset(LOWPOLY_CART);
-		loadAsset(PLANE);
+		var p = OBJ.downloadModels([LOWPOLY_CART, PLANE]);
+
+		p.then(function (m) {
+			meshes = m;
+			initBuffers();
+			// Set up to draw the scene periodically.
+			setInterval(function () {
+				update();
+				drawScene();
+
+			}, 15);
+		});
 
 		// Bind keyboard handling functions to document handlers
 		document.onkeydown = function (event) {
@@ -167,12 +201,5 @@ function main() {
 		document.onkeyup = function (event) {
 			currentlyPressedKeys[event.keyCode] = false;
 		};
-		// Set up to draw the scene periodically.
-		setInterval(function () {
-			if (NUM_ASSETS <= loadedMeshes) {
-				update();
-				drawScene();
-			}
-		}, 15);
 	}
 }

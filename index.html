@@ -15,39 +15,66 @@
 
     <!-- Fragment shader program -->
     <script id="shader-fs" type="x-shader/x-fragment">
-		    // set medium percision
-		    precision mediump float;
-		    // uniform attribute for setting the color
-		    //varying vec4 vColor;
-		    void main(void) {
-	        	// Setting color of fragments to input color
-		        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-		    }
-	    </script>
+		precision mediump float;
+
+        varying vec2 vTextureCoord;
+        varying vec3 vTransformedNormal;
+        varying vec4 vPosition;
+
+        varying vec3 vDiffuse;
+        varying vec3 vSpecular;
+        varying float vSpecularExponent;
+
+        void main(void) {
+            vec3 V = -normalize(vPosition.xyz);
+            vec3 L = normalize(vec3(1.0, 1.0, 1.0));
+            vec3 H = normalize(L + V);
+            vec3 N = normalize(vTransformedNormal);
+            vec3 color = vDiffuse * dot(N, L) +
+              vSpecular * pow(dot(H, N), vSpecularExponent);
+            gl_FragColor = vec4(color, 1.0);
+        }
+    </script>
 
 
     <!-- Vertex shader program -->
     <script id="shader-vs" type="x-shader/x-vertex">
-    		// atributes for setting vertex position and color
-		    attribute vec3 aVertexPosition;
-		    //attribute vec4 aVertexColor;
-		    uniform mat4 uMVMatrix;	// model-view matrix
-		    uniform mat4 uPMatrix;	// projection matrix
-		    // variable for passing color from vertex shader to fragment shader
-		    varying vec4 vColor;
-		    void main(void) {
-		    	// calculate the vertex position
-		        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-		        //vColor = aVertexColor;
-		    }
-	    </script>
+    	attribute vec3 aVertexPosition;
+        attribute vec3 aVertexNormal;
+        attribute vec2 aTextureCoord;
+        attribute vec3 aDiffuse;
+        attribute vec3 aSpecular;
+        attribute float aSpecularExponent;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+        uniform mat3 uNMatrix;
+
+        varying vec2 vTextureCoord;
+        varying vec3 vTransformedNormal;
+        varying vec4 vPosition;
+
+        varying vec3 vDiffuse;
+        varying vec3 vSpecular;
+        varying float vSpecularExponent;
+
+        void main(void) {
+            vDiffuse = aDiffuse;
+            vSpecular = aSpecular;
+            vSpecularExponent = aSpecularExponent;
+            vPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+            gl_Position = uPMatrix * vPosition;
+            vTextureCoord = aTextureCoord;
+            vTransformedNormal = uNMatrix * aVertexNormal;
+        }
+    </script>
 </head>
-<body onload="main()">
-    <h1>UNIRacer</h1>
-    <canvas id="glcanvas" width="1280px" height="720px">
-        No <code>&lt;canvas&gt;</code> support in your browser.
-    </canvas>
-    <br/>
-    <br/>
+<body onload="main();">
+<h1>UNIRacer</h1>
+<canvas id="glcanvas" width="1280px" height="720px">
+    No <code>&lt;canvas&gt;</code> support in your browser.
+</canvas>
+<br/>
+<br/>
 </body>
 </html>
