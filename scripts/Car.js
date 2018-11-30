@@ -13,7 +13,7 @@ function Car(position, rotation, speed, rotationSpeed) {
 
 
 Car.prototype.accelerate = function(deltaTime) {
-	//var a = this.speed + Math.exp(-0.03 * this.speed);
+	//var a = this.speed + Math.exp(-140.1 * this.speed);
 	var a = 0.05;
 	this.speed += a * deltaTime;
 };

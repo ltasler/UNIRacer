@@ -20,7 +20,7 @@ var meshes = {};
 var models = {};
 
 const CAMERA_OFFSET = [0, -2.5, -10];
-const CAMERA_ROTATION_X = 30;
+const CAMERA_ROTATION_X = 20;
 
 //
 // Matrix utility functions
@@ -116,8 +116,15 @@ function drawScene() {
 	var carMvMatrixInv = car.getInverseMvMatrix();
 
 	mvPushMatrix();
-	m = models[PLANE.name];
+	m = models[TRACK.name];
 	mat4.translate(mvMatrix, [0, -1.5, 0]);
+	mat4.multiply(mvMatrix, carMvMatrixInv);
+	renderObject(m);
+	mvPopMatrix();
+
+	mvPushMatrix();
+	m = models[BILLBOARD.name];
+	mat4.translate(mvMatrix, [5, 0, -20]);
 	mat4.multiply(mvMatrix, carMvMatrixInv);
 	renderObject(m);
 	mvPopMatrix();
@@ -181,7 +188,7 @@ function main() {
 		// vertices and so forth is established.
 		shaderProgram = initShaders();
 
-		var p = OBJ.downloadModels([LOWPOLY_CART, PLANE]);
+		var p = OBJ.downloadModels([LOWPOLY_CART, TRACK, BILLBOARD]);
 
 		p.then(function (m) {
 			meshes = m;

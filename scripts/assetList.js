@@ -41,6 +41,18 @@ var LOWPOLY_CART = {
 	mtl: ASSETS_PATH + '/kart/lowpoly_kart.mtl'
 };
 
+var TRACK = {
+	name: 'Track',
+	obj: ASSETS_PATH + '/track/track.obj',
+	mtl: ASSETS_PATH + '/track/track.mtl'
+};
+
+var BILLBOARD = {
+	name: 'Billboard',
+	obj: ASSETS_PATH + '/billboard/billboard.obj',
+	mtl: ASSETS_PATH + '/billboard/billboard.mtl'
+};
+
 function getAssetPath(asset) {
 	return ASSETS_PATH + '/' + asset.model_path;
 }
