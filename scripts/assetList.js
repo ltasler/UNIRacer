@@ -25,4 +25,8 @@ var PLANE = {
 
 var TEST_CAR = {
 	model_path: 'test_car/test_car.obj'
-}
+};
+
+var LOWPOLY_CART = {
+	model_path: 'kart/lowpoly_kart.obj'
+};

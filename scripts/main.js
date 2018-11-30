@@ -14,10 +14,6 @@ var mvMatrixStack = [];
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
 
-// Variables for storing curent rotation of pyramid and cube
-var rotationPyramid = 0;
-var rotationCube = 0;
-
 // Helper variable for animation
 var lastTime = 0;
 
@@ -263,7 +259,6 @@ function drawScene() {
 
 	// Save the current matrix, then rotate before we draw.
 	mvPushMatrix();
-	mat4.rotate(mvMatrix, degToRad(rotationPyramid), [0, 1, 0]);
 
 	// Draw the pyramid by binding the array buffer to the cube's vertices
 	// array, setting attributes, and pushing it to GL.
@@ -272,7 +267,7 @@ function drawScene() {
 
 	// Set the colors attribute for the vertices.
 	gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexColorBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, pyramidVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	//gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, pyramidVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 	// Draw the pyramid.
 	setMatrixUniforms();
@@ -288,22 +283,32 @@ function drawScene() {
 	// drawing the cube.
 	mvPushMatrix();
 	mat4.identity(mvMatrix);
-	mat4.translate(mvMatrix, [0, -1, -7]);
+	mat4.translate(mvMatrix, [0, 0, -10]);
 
 	// Draw the cube by binding the array buffer to the cube's vertices
 	// array, setting attributes, and pushing it to GL.
-	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	// gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+	// gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize,
+	// 	gl.FLOAT, false, 0, 0);
+	//
+	// // Set the colors attribute for the vertices.
+	// gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+	// //gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize,
+	// //	gl.FLOAT, false, 0, 0);
+	//
+	// gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+	//
+	// // Draw the cube.
+	// setMatrixUniforms();
+	// gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
-	// Set the colors attribute for the vertices.
-	gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mesh.vertexBuffer.itemSize,
+		gl.FLOAT, false, 0, 0);
 
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-
-	// Draw the cube.
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
 	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLES, mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
 	// Restore the original matrix
 	mvPopMatrix();
@@ -314,9 +319,6 @@ function update() {
 	var timeNow = new Date().getTime();
 	if (lastTime !== 0) {
 		var elapsed = (timeNow - lastTime) / 1000.0;
-
-		//legacy stuff
-		rotationPyramid += (90 * elapsed);
 
 		if (currentlyPressedKeys[87] || currentlyPressedKeys[38])  // W || ArrowUp
 			car.accelerate(elapsed);
@@ -332,7 +334,7 @@ function update() {
 	lastTime = timeNow;
 }
 
-
+var mesh;
 //
 // start
 //
@@ -358,19 +360,29 @@ function main() {
 		// we'll be drawing.
 		initBuffers();
 
+
 		// Bind keyboard handling functions to document handlers
 		document.onkeydown = function (event) {
 			currentlyPressedKeys[event.keyCode] = true;
 		};
-		document.onkeyup = function(event) {
+		document.onkeyup = function (event) {
 			currentlyPressedKeys[event.keyCode] = false;
 		};
 
-		// Set up to draw the scene periodically.
-		setInterval(function () {
-			//requestAnimationFrame(animate);
-			update();
-			drawScene();
-		}, 15);
+		var request = new XMLHttpRequest();
+		request.open('GET', ASSETS_PATH + '/' + LOWPOLY_CART.model_path);
+		request.onreadystatechange = function () {
+			if (request.readyState === 4) {
+				mesh = new OBJ.Mesh(request.response);
+				OBJ.initMeshBuffers(gl, mesh);
+				// Set up to draw the scene periodically.
+				setInterval(function () {
+					//requestAnimationFrame(animate);
+					update();
+					drawScene();
+				}, 15);
+			}
+		};
+		request.send();
 	}
 }

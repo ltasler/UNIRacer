@@ -79,10 +79,10 @@ function initShaders() {
 	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
 	// store location of aVertexColor variable defined in shader
-	shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+	//shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
 
 	// turn on vertex color attribute at specified position
-	gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+	//gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
 	// store location of uPMatrix variable defined in shader - projection matrix
 	shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
