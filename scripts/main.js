@@ -80,7 +80,7 @@ function drawScene() {
 
 	mat4.identity(mvMatrix);
 	mat4.translate(mvMatrix, CAMERA_OFFSET);
-	mat4.rotateX(mvMatrix, degToRad(CAMERA_ROTATION_X);
+	mat4.rotateX(mvMatrix, degToRad(CAMERA_ROTATION_X));
 
 	// lowpoly Kart rendering
 	mvPushMatrix();
