@@ -259,6 +259,9 @@ function drawScene() {
 	// Now move the drawing position a bit to where we want to start
 	// drawing the pyramid.
 	mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
+	var carMvMatrix = car.getMvMatrix();
+	mat4.inverse(carMvMatrix);
+	mat4.multiply(mvMatrix, carMvMatrix);
 
 	// Save the current matrix, then rotate before we draw.
 	mvPushMatrix();
@@ -286,7 +289,8 @@ function drawScene() {
 	// Now move the drawing position a bit to where we want to start
 	// drawing the cube.
 	mvPushMatrix();
-	mvMatrix = car.getMvMatrix();
+	mat4.identity(mvMatrix);
+	mat4.translate(mvMatrix, [0, -1, -7]);
 
 	// Draw the cube by binding the array buffer to the cube's vertices
 	// array, setting attributes, and pushing it to GL.

@@ -5,7 +5,7 @@
 function Car(position, rotation, speed, rotationSpeed) {
 	this.positon = typeof position !== 'undefined' ? position : [0.0, 0.0, 0.0];
 	this.speed = typeof speed !== 'undefined' ? speed : 0.0;
-	this.rotation = typeof rotation !== 'undefined' ? rotation : degToRad(270);
+	this.rotation = typeof rotation !== 'undefined' ? rotation : 0;
 	this.rotationSpeed = typeof rotationSpeed !== 'undefined' ? rotationSpeed : 3;
 	this.BRAKE_SPEED = 0.1;
 	this.DRAG_SPEED = 0.02;
@@ -56,7 +56,7 @@ Car.prototype.getMvMatrix = function() {
 	mat4.identity(mvMatrix);
 	mat4.translate(mvMatrix, [0,-1,-7]);
 	mat4.translate(mvMatrix, this.positon);
-	mat4.rotate(mvMatrix, -this.rotation, [0, 1, 0]);
+	mat4.rotate(mvMatrix, -this.rotation + degToRad(270), [0, 1, 0]);
 	return mvMatrix;
 };
 
