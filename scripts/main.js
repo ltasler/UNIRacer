@@ -259,9 +259,7 @@ function drawScene() {
 	// Now move the drawing position a bit to where we want to start
 	// drawing the pyramid.
 	mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
-	var carMvMatrix = car.getMvMatrix();
-	mat4.inverse(carMvMatrix);
-	mat4.multiply(mvMatrix, carMvMatrix);
+	mat4.multiply(mvMatrix, car.getInverseMvMatrix());
 
 	// Save the current matrix, then rotate before we draw.
 	mvPushMatrix();
