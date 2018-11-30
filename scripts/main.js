@@ -20,7 +20,9 @@ var meshes = {};
 var loadedMeshes = 0;
 
 // Number of all assets
-const NUM_ASSETS = 1;
+const NUM_ASSETS = 2;
+
+const CAMERA_OFFSET = [0, 0, -10];
 
 //
 // Matrix utility functions
@@ -42,9 +44,6 @@ function mvPopMatrix() {
 	mvMatrix = mvMatrixStack.pop();
 }
 
-function degToRad(degrees) {
-	return degrees * Math.PI / 180;
-}
 
 //
 // setMatrixUniforms
@@ -56,59 +55,64 @@ function setMatrixUniforms() {
 	gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 }
 
-function loadAsset(path) {
+function loadAsset(asset) {
 	var request = new XMLHttpRequest();
-	request.open('GET', path);
+	request.open('GET', getAssetPath(asset));
 	request.onreadystatechange = function () {
 		if (request.readyState === 4) {
-			mesh = new OBJ.Mesh(request.response);
-			OBJ.initMeshBuffers(gl, mesh);
+			meshes[asset.name] = new OBJ.Mesh(request.response);
+			OBJ.initMeshBuffers(gl, meshes[asset.name]);
 			loadedMeshes++;
 		}
 	};
 	request.send();
 }
 
+//<editor-fold> Drawing the scene
 //
 // drawScene
 //
 // Draw the scene.
 //
 function drawScene() {
-	// set the rendering environment to full canvas size
-	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	// Clear the canvas before we start drawing on it.
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	setPerspective();
 
-	// Establish the perspective with which we want to view the
-	// scene. Our field of view is 45 degrees, with a width/height
-	// ratio and we only want to see objects between 0.1 units
-	// and 100 units away from the camera.
-	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-
-	// Set the drawing position to the "identity" point, which is
-	// the center of the scene.
 	mat4.identity(mvMatrix);
+	mat4.translate(mvMatrix, CAMERA_OFFSET);
 
-	// CUBE:
-
-	// Now move the drawing position a bit to where we want to start
-	// drawing the cube.
+	// lowpoly Kart rendering
 	mvPushMatrix();
-	mat4.identity(mvMatrix);
-	mat4.translate(mvMatrix, [0, 0, -10]);
+	var m = meshes[LOWPOLY_CART.name];
+	renderObject(m.vertexBuffer, m.indexBuffer);
+	mvPopMatrix();
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mesh.vertexBuffer.itemSize,
-		gl.FLOAT, false, 0, 0);
+	var carMvMatrixInv = car.getInverseMvMatrix();
 
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
-	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES, mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-
-	// Restore the original matrix
+	mvPushMatrix();
+	m = meshes[PLANE.name];
+	mat4.translate(mvMatrix, [0, -1.5, 0]);
+	mat4.multiply(mvMatrix, carMvMatrixInv);
+	renderObject(m.vertexBuffer, m.indexBuffer);
 	mvPopMatrix();
 }
+
+function renderObject(vertexBuffer, indexBuffer) {
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexBuffer.itemSize,
+		gl.FLOAT, false, 0, 0);
+
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+	setMatrixUniforms();
+	gl.drawElements(gl.TRIANGLES, indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+function setPerspective() {
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+}
+
+//</editor-fold>
 
 
 function update() {
@@ -130,7 +134,6 @@ function update() {
 	lastTime = timeNow;
 }
 
-var mesh;
 //
 // start
 //
@@ -152,7 +155,8 @@ function main() {
 		// vertices and so forth is established.
 		shaderProgram = initShaders();
 
-		loadAsset(ASSETS_PATH + '/' + LOWPOLY_CART.model_path);
+		loadAsset(LOWPOLY_CART);
+		loadAsset(PLANE);
 
 		// Bind keyboard handling functions to document handlers
 		document.onkeydown = function (event) {
