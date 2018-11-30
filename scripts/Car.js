@@ -68,7 +68,3 @@ Car.prototype.getInverseMvMatrix = function () {
 	return m;
 };
 
-
-function degToRad(degrees) {
-	return degrees * Math.PI / 180;
-}

@@ -22,7 +22,8 @@ var loadedMeshes = 0;
 // Number of all assets
 const NUM_ASSETS = 2;
 
-const CAMERA_OFFSET = [0, 0, -10];
+const CAMERA_OFFSET = [0, -2.5, -10];
+const CAMERA_ROTATION_X = 30;
 
 //
 // Matrix utility functions
@@ -79,6 +80,7 @@ function drawScene() {
 
 	mat4.identity(mvMatrix);
 	mat4.translate(mvMatrix, CAMERA_OFFSET);
+	mat4.rotateX(mvMatrix, degToRad(CAMERA_ROTATION_X);
 
 	// lowpoly Kart rendering
 	mvPushMatrix();
