@@ -117,7 +117,7 @@ function drawScene() {
 
 	mvPushMatrix();
 	m = models[TRACK.name];
-	mat4.translate(mvMatrix, [0, -1.5, 0]);
+	mat4.translate(mvMatrix, [0, 0, 0]);
 	mat4.multiply(mvMatrix, carMvMatrixInv);
 	renderObject(m);
 	mvPopMatrix();
@@ -188,7 +188,7 @@ function main() {
 		// vertices and so forth is established.
 		shaderProgram = initShaders();
 
-		var p = OBJ.downloadModels([LOWPOLY_CART, TRACK, BILLBOARD]);
+		var p = OBJ.downloadModels([LOWPOLY_CART, TRACK, BILLBOARD, TREES]);
 
 		p.then(function (m) {
 			meshes = m;

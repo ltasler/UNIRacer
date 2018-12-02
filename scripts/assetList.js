@@ -11,29 +11,6 @@
 const ASSETS_PATH = 'assets';
 
 
-var WORLD = {
-	model_path: ASSETS_PATH + 'NewTrack/FullTrack.obj',
-	material: ASSETS_PATH + 'NewTrack/FullTrack.mtl',
-	name: 'World'
-};
-
-var CUBE = {
-	model_path: 'cube.obj',
-	material_path: 'cube.mtl',
-	name: 'Cube'
-};
-
-var PLANE = {
-	name: 'Plane',
-	obj: ASSETS_PATH + '/plane/plane.obj',
-	mtl: ASSETS_PATH + '/plane/plane.mtl'
-};
-
-var TEST_CAR = {
-	model_path: 'test_car/test_car.obj',
-	material_path: 'test_car/test_car.mtl',
-	name: 'TestCar'
-};
 
 var LOWPOLY_CART = {
 	name: 'LowPolyCart',
@@ -42,15 +19,21 @@ var LOWPOLY_CART = {
 };
 
 var TRACK = {
-	name: 'Track',
-	obj: ASSETS_PATH + '/track/track.obj',
-	mtl: ASSETS_PATH + '/track/track.mtl'
+	name: 'road',
+	obj: ASSETS_PATH + '/road/road.obj',
+	mtl: ASSETS_PATH + '/road/road.mtl'
 };
 
 var BILLBOARD = {
-	name: 'Billboard',
-	obj: ASSETS_PATH + '/billboard/billboard.obj',
-	mtl: ASSETS_PATH + '/billboard/billboard.mtl'
+	name: 'Banner',
+	obj: ASSETS_PATH + '/banner/banner.obj',
+	mtl: ASSETS_PATH + '/banner/banner.mtl'
+};
+
+var TREES = {
+	name: 'Trees',
+	obj: ASSETS_PATH + '/trees/trees.obj',
+	mtl: ASSETS_PATH + '/trees/trees.mtl'
 };
 
 function getAssetPath(asset) {
