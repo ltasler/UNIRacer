@@ -29,7 +29,7 @@ function mvPushMatrix() {
 
 function mvPopMatrix() {
 	if (mvMatrixStack.length == 0) {
-		throw "Invalid popMatrix!";
+		throw 'Invalid popMatrix!';
 	}
 	mvMatrix = mvMatrixStack.pop();
 }
@@ -139,7 +139,7 @@ function drawScene() {
 	mat4.identity(mvMatrix);
 	mat4.translate(mvMatrix, CAMERA_OFFSET);
 
-	var carTranslateMatrix = car.getTranslateMatrix([0,0,0]);
+	var carTranslateMatrix = car.getTranslateMatrix([0, 0, 0]);
 	var carRotationMatrix = car.getRotationMatrix();
 
 	var invCarTranslateMatrix = mat4.create(carTranslateMatrix);
@@ -167,7 +167,7 @@ function drawScene() {
 
 	mvPushMatrix();
 	var s = createScaleMatrix(35);
-	mat4.translate(mvMatrix, [0.0, -0.1, 0.0])
+	mat4.translate(mvMatrix, [0.0, -0.1, 0.0]);
 	mat4.multiply(mvMatrix, createMvMatrix(invCarRotationMatrix, invCarTranslateMatrix, s));
 	m = models[BILLBOARD.name];
 	renderObject(m);
