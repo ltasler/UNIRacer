@@ -2,7 +2,7 @@
 var gl;
 var shaderProgram;
 
-// Model-view and projection matrix and model-view matrix stack
+// Model-view and projection matrix
 var mvMatrixStack = [];
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
@@ -20,15 +20,7 @@ var meshes = {};
 var models = {};
 
 const CAMERA_OFFSET = [0, -2.5, -10];
-const CAMERA_ROTATION_X = 20;
 
-//
-// Matrix utility functions
-//
-// mvPush   ... push current matrix on matrix stack
-// mvPop    ... pop top matrix from stack
-// degToRad ... convert degrees to radians
-//
 function mvPushMatrix() {
 	var copy = mat4.create();
 	mat4.set(mvMatrix, copy);
@@ -37,11 +29,14 @@ function mvPushMatrix() {
 
 function mvPopMatrix() {
 	if (mvMatrixStack.length == 0) {
-		throw 'Invalid popMatrix!';
+		throw "Invalid popMatrix!";
 	}
 	mvMatrix = mvMatrixStack.pop();
 }
 
+function degToRad(degrees) {
+	return degrees * Math.PI / 180;
+}
 
 //
 // setMatrixUniforms
@@ -95,6 +90,44 @@ function initBuffers() {
 }
 
 //<editor-fold> Drawing the scene
+function createMvMatrix(translateMatrix, rotationMatrix, scaleMatrix) {
+	if (!translateMatrix) {
+		translateMatrix = mat4.create();
+		mat4.identity(translateMatrix);
+	}
+	if (!rotationMatrix) {
+		rotationMatrix = mat4.create();
+		mat4.identity(rotationMatrix);
+	}
+	if (!scaleMatrix) {
+		scaleMatrix = mat4.create();
+		mat4.identity(scaleMatrix);
+	}
+
+	var mvMatrix = mat4.create();
+	mat4.identity(mvMatrix);
+
+	mat4.multiply(mvMatrix, translateMatrix);
+	mat4.multiply(mvMatrix, rotationMatrix);
+	mat4.multiply(mvMatrix, scaleMatrix);
+
+	return mvMatrix;
+}
+
+function createInverseMvMatrix(translateMatrix, rotationMatrix) {
+	var a = createMvMatrix(translateMatrix, rotationMatrix);
+	mat4.inverse(a);
+	return a;
+}
+
+function createScaleMatrix(x) {
+	x = [x, x, x, x]; //Yaradi tega kako dela mat
+	var a = mat4.create();
+	mat4.identity(a);
+	mat4.scale(a, x);
+	return a;
+}
+
 //
 // drawScene
 //
@@ -105,27 +138,38 @@ function drawScene() {
 
 	mat4.identity(mvMatrix);
 	mat4.translate(mvMatrix, CAMERA_OFFSET);
-	mat4.rotateX(mvMatrix, degToRad(CAMERA_ROTATION_X));
+
+	var carTranslateMatrix = car.getTranslateMatrix([0,0,0]);
+	var carRotationMatrix = car.getRotationMatrix();
+
+	var invCarTranslateMatrix = mat4.create(carTranslateMatrix);
+	mat4.inverse(invCarTranslateMatrix);
+	var invCarRotationMatrix = mat4.create(carRotationMatrix);
+	mat4.inverse(invCarRotationMatrix);
 
 	// lowpoly Kart rendering
 	mvPushMatrix();
+	//mat4.multiply(mvMatrix, createMvMatrix(carTranslateMatrix, carRotationMatrix, createScaleMatrix(1)));
 	var m = models[LOWPOLY_CART.name];
 	renderObject(m);
 	mvPopMatrix();
 
-	var carMvMatrixInv = car.getInverseMvMatrix();
 
+	mat4.translate(mvMatrix, [0, -0.55, 0]);
+	//drawing the track
 	mvPushMatrix();
+	//Ker racanumao y inveryim moramo it glih kontra.. prvo rotiramo potem transliramo
+	var s = createScaleMatrix(30);
+	mat4.multiply(mvMatrix, createMvMatrix(invCarRotationMatrix, invCarTranslateMatrix, s));
 	m = models[TRACK.name];
-	mat4.translate(mvMatrix, [0, 0, 0]);
-	mat4.multiply(mvMatrix, carMvMatrixInv);
 	renderObject(m);
 	mvPopMatrix();
 
 	mvPushMatrix();
+	var s = createScaleMatrix(35);
+	mat4.translate(mvMatrix, [0.0, -0.1, 0.0])
+	mat4.multiply(mvMatrix, createMvMatrix(invCarRotationMatrix, invCarTranslateMatrix, s));
 	m = models[BILLBOARD.name];
-	mat4.translate(mvMatrix, [5, 0, -20]);
-	mat4.multiply(mvMatrix, carMvMatrixInv);
 	renderObject(m);
 	mvPopMatrix();
 }

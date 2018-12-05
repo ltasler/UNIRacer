@@ -5,7 +5,7 @@
 function Car(position, rotation, speed, rotationSpeed) {
 	this.positon = typeof position !== 'undefined' ? position : [0.0, 0.0, 0.0];
 	this.speed = typeof speed !== 'undefined' ? speed : 0.0;
-	this.rotation = typeof rotation !== 'undefined' ? rotation : 0;
+	this.rotation = typeof rotation !== 'undefined' ? rotation : degToRad(-90);
 	this.rotationSpeed = typeof rotationSpeed !== 'undefined' ? rotationSpeed : 3;
 	this.BRAKE_SPEED = 0.1;
 	this.DRAG_SPEED = 0.02;
@@ -28,7 +28,7 @@ Car.prototype.rotate = function(direction, deltaTime) {
 	this.rotation = this.rotation + direction * this.rotationSpeed * deltaTime;
 };
 
-
+// This function should be called every frame. It calculates all the logic for car.
 Car.prototype.update = function(deltaTime) {
 	var direction = this.getDirection();
 
@@ -53,18 +53,16 @@ Car.prototype.getDirection = function () {
 	return [x, y, z];
 };
 
-Car.prototype.getMvMatrix = function() {
-	var mvMatrix = mat4.create();
-	mat4.identity(mvMatrix);
-	mat4.translate(mvMatrix, [0,-1,-7]);
-	mat4.translate(mvMatrix, this.positon);
-	mat4.rotate(mvMatrix, -this.rotation + degToRad(270), [0, 1, 0]);
-	return mvMatrix;
+Car.prototype.getTranslateMatrix = function () {
+	var a = mat4.create();
+	mat4.identity(a);
+	mat4.translate(a, this.positon);
+	return a;
 };
 
-Car.prototype.getInverseMvMatrix = function () {
-	var m = this.getMvMatrix();
-	mat4.inverse(m, m);
-	return m;
+Car.prototype.getRotationMatrix = function () {
+	var a = mat4.create();
+	mat4.identity(a);
+	mat4.rotateY(a, -this.rotation + degToRad(270));
+	return a;
 };
-
